@@ -1,33 +1,65 @@
-# Publishing
+# Publishing to npm
 
-Order matters — the engine lives in the cursor-translate repo:
+Single package: **`claude-translate`** (unscoped, under your npm user account).
 
-1. **Publish the engine** from `cursor-translate` (bumped to 0.2.0 with the `claude-cli` provider):
-   ```bash
-   cd ../cursor-translate
-   npm publish -w packages/core --access public
-   npm publish -w packages/mcp --access public   # optional but used by init's MCP wrapper
-   ```
-2. **Publish claude-translate** (depends on `@cursor-translate/core@^0.2.0`):
-   ```bash
-   npm install        # now resolves from the registry; commit the generated package-lock.json
-   npm test
-   npm publish --access public
-   ```
-   Also remove the temporary "no lockfile" note from `.github/workflows/ci.yml` (switch `npm install` → `npm ci`).
-3. **Marketplace**: push this repo to GitHub as `davlet42/claude-translate`. The root `.claude-plugin/marketplace.json` makes the repo itself installable:
-   ```
-   /plugin marketplace add davlet42/claude-translate
-   /plugin install claude-translate@claude-translate
-   ```
+Runtime dependency `@cursor-translate/core@^0.2.0` is already on npm — publish only this repo.
 
-Local development without published packages:
+---
+
+## CI (GitHub Actions)
+
+| Trigger | Workflow |
+|---|---|
+| push/PR `main` | `.github/workflows/ci.yml` — `npm ci` + `npm test` |
+| tag `v*` | `.github/workflows/publish.yml` — test + `npm publish` |
+| manual | Actions → **Publish npm** → **Run workflow** |
+
+### GitHub secret
+
+Repo **Settings → Secrets and variables → Actions** → **`NPM_TOKEN`**
+
+Use the same **Automation** classic token as [cursor-translate](https://github.com/davlet42/cursor-translate) (must include publish on unscoped `claude-translate`). Create at [npmjs.com/settings/~/tokens](https://www.npmjs.com/settings/~/tokens) with **Bypass 2FA**.
+
+### Release flow
 
 ```bash
-cd ../cursor-translate/packages/core && npm link
-cd ../mcp && npm link
-cd ../../../claude-translate && npm link @cursor-translate/core @cursor-translate/mcp
-npm run build && npm test
+# 1. Bump version in package.json + plugin/.claude-plugin/plugin.json
+# 2. Regenerate lockfile from registry (see below)
+npm ci && npm test
+
+git commit -am "Bump version to 0.1.x"
+git push origin main
+
+git tag v0.1.x && git push origin v0.1.x
 ```
 
-Note: `plugin/hooks/*.sh` and `log-metrics.mjs` must keep their executable bit (git tracks it; verify after checkout on a fresh clone).
+CI publishes to npm. GitHub Release is separate:
+
+```bash
+gh release create v0.1.x --title "v0.1.x" --latest --notes "…"
+```
+
+---
+
+## Lockfile trap (local dev)
+
+If `npm install` runs next to `~/Projects/cursor-translate`, `package-lock.json` may link `../cursor-translate/packages/core`. CI will break. Regenerate in isolation:
+
+```bash
+TMP=$(mktemp -d)
+cp package.json "$TMP/"
+cd "$TMP" && npm install
+cp package-lock.json ~/Projects/claude-translate/
+cd ~/Projects/claude-translate && rm -rf node_modules && npm ci && npm test
+```
+
+---
+
+## Manual publish (fallback)
+
+```bash
+npm login
+npm whoami
+npm ci && npm test
+npm publish
+```
