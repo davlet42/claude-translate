@@ -68,6 +68,11 @@ export async function runResolveFromHookInput(
           'claude-translate: translate quota exhausted; reading Russian source without translation.',
       };
     }
+    if (result.action === 'lazy_deferred' && result.userHint) {
+      return {
+        systemMessage: result.userHint,
+      };
+    }
     return {};
   }
 

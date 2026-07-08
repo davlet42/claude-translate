@@ -37,6 +37,10 @@ cache:
   # Reuse fresh entries from a sibling install (cursor-translate) before
   # re-translating. Override candidates: CLAUDE_TRANSLATE_SIBLING_HOMES.
   share_siblings: true
+  lazy_read_max_chars: 50000
+  lazy_read_max_chunks: 3
+  lazy_read_hints: true
+  incremental: section
 
 glossary:
   file: ~/.claude/translate-proxy/glossary.yaml
