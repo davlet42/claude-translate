@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.3 (2026-07-08)
+
+Fixes the "replies suddenly show in English again" failure chain (requires `@cursor-translate/core` ≥ 0.2.6):
+
+- **Quota latch now expires.** When a translate hop hits the subscription usage limit, core writes a quota latch that used to disable prompt/display translation *permanently* (it only cleared after a successful doc translation). The latch now auto-expires after 30 minutes (`CLAUDE_TRANSLATE_QUOTA_TTL_MIN` to override).
+- **Quota is no longer silent.** While the latch is active the display hook emits a `systemMessage` ("translate tier hit its usage limit…") instead of silently showing English.
+- **Parallel display translation.** Long replies are split by paragraphs and translated concurrently — wall-clock is the slowest chunk, not the sum (measured: 2.5k chars 116s → 54s on a throttled account; ~10–20s normally). MessageDisplay hook timeout raised 60s → 120s as headroom.
+
+
+
 ## 0.3.2 (2026-07-08)
 
 - **Fix section cache flat file** (via `@cursor-translate/core` ≥ 0.2.5): `claude-translate doc` no longer leaves only `*.en.sections.json` without the flat `*.en.md`; read-path self-heal rebuilds missing flat caches from sidecars.

@@ -1,6 +1,6 @@
 {
   "name": "claude-translate",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Save tokens on Cyrillic text in Claude Code: cheap Haiku translate tier, lazy EN doc cache via PreToolUse hook, CLAUDE.md sync, MCP",
   "license": "MIT",
   "type": "module",
@@ -38,10 +38,10 @@
     "node": ">=24"
   },
   "dependencies": {
-    "@cursor-translate/core": "^0.2.5"
+    "@cursor-translate/core": "^0.2.6"
   },
   "optionalDependencies": {
-    "@cursor-translate/mcp": "npm:null@*"
+    "@cursor-translate/mcp": "^0.2.6"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

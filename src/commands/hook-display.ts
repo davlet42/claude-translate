@@ -34,6 +34,34 @@ function parseDeltaEvent(hookInput: Record<string, unknown>): DisplayDeltaEvent 
   };
 }
 
+// Group paragraphs into chunks around this size for parallel translation.
+const DISPLAY_CHUNK_TARGET_CHARS = 1500;
+
+export function splitForDisplay(text: string): string[] {
+  if (text.length <= DISPLAY_CHUNK_TARGET_CHARS) {
+    return [text];
+  }
+
+  const paragraphs = text.split(/\n{2,}/);
+  const chunks: string[] = [];
+  let current = '';
+
+  for (const paragraph of paragraphs) {
+    const candidate = current ? `${current}\n\n${paragraph}` : paragraph;
+    if (candidate.length > DISPLAY_CHUNK_TARGET_CHARS && current) {
+      chunks.push(current);
+      current = paragraph;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current) {
+    chunks.push(current);
+  }
+
+  return chunks;
+}
+
 function bufferPath(): string {
   return join(resolveClaudeTranslateHome(), BUFFER_FILE);
 }
@@ -123,18 +151,35 @@ export async function resolveDisplayFromHookInput(
 
   const cwd = typeof hookInput.cwd === 'string' ? hookInput.cwd : undefined;
 
-  // backTranslateResponse applies its own gates (already Russian, disabled,
-  // quota exhausted) and logs response_back_translated metrics.
-  const result = await backTranslateResponse({ text, cwd });
+  // Long replies are split by paragraphs and translated in PARALLEL: the hook
+  // timeout is fixed, but a sequential hop scales with reply length (a 2.5k
+  // reply took ~2min under account throttling). Wall-clock becomes the
+  // slowest chunk instead of the sum.
+  const chunks = splitForDisplay(text);
 
-  if (result.skipped || result.text === text) {
+  // backTranslateResponse applies its own gates (already Russian, disabled,
+  // quota exhausted) and logs response_back_translated metrics per chunk.
+  const results = await Promise.all(chunks.map((chunk) => backTranslateResponse({ text: chunk, cwd })));
+
+  // On quota exhaustion show the original but tell the user why — a silent
+  // English reply reads as "the plugin is broken".
+  if (results.some((r) => r.skipped && (r.reason === 'quota_blocked' || r.reason === 'quota_exhausted'))) {
+    return {
+      systemMessage:
+        'claude-translate: translate tier hit its usage limit; showing the original reply (retries automatically after cooldown).',
+    };
+  }
+
+  const translated = results.map((r, i) => (r.skipped ? chunks[i] : r.text)).join('\n\n');
+
+  if (translated === text) {
     return {};
   }
 
   return {
     hookSpecificOutput: {
       hookEventName: 'MessageDisplay',
-      displayContent: result.text,
+      displayContent: translated,
     },
   };
 }

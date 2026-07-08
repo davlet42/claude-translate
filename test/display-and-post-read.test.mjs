@@ -15,7 +15,9 @@ const PROJECT = mkdtempSync(join(tmpdir(), 'claude-translate-display-project-'))
 const { loadClaudeConfigExtras, CLAUDE_CONFIG_EXTRAS_DEFAULTS } = await import(
   '../dist/helpers/load-claude-config-extras.js'
 );
-const { resolveDisplayFromHookInput } = await import('../dist/commands/hook-display.js');
+const { resolveDisplayFromHookInput, splitForDisplay } = await import(
+  '../dist/commands/hook-display.js'
+);
 const { resolvePostReadFromHookInput } = await import('../dist/commands/hook-post-read.js');
 const { runResolveFromHookInput } = await import('../dist/commands/resolve.js');
 const { buildSessionStartNote } = await import('../dist/commands/hook-session-start.js');
@@ -157,6 +159,48 @@ describe('resolveDisplayFromHookInput (MessageDisplay contract)', () => {
     });
     assert.deepEqual(output, {});
     writeConfig({ display: true });
+  });
+
+  it('reports the quota latch via systemMessage instead of staying silent', async () => {
+    writeConfig({ display: true });
+    writeFileSync(
+      join(HOME, 'doc-translate-quota.json'),
+      JSON.stringify({ exhaustedAt: new Date().toISOString(), reason: 'test latch' }),
+      'utf8',
+    );
+
+    const output = await resolveDisplayFromHookInput({
+      delta: 'An English assistant reply that is definitely long enough to pass thresholds.',
+      message_id: 'm-quota',
+      index: 0,
+      final: true,
+    });
+
+    assert.match(String(output.systemMessage ?? ''), /usage limit/i);
+    writeFileSync(join(HOME, 'doc-translate-quota.json'), '', 'utf8');
+  });
+});
+
+describe('splitForDisplay', () => {
+  it('keeps short texts as a single chunk', () => {
+    assert.deepEqual(splitForDisplay('Short reply.'), ['Short reply.']);
+  });
+
+  it('splits long texts by paragraphs and preserves the content', () => {
+    const paragraph = 'A sentence of reasonable length repeated to build a paragraph. '.repeat(8).trim();
+    const text = [paragraph, paragraph, paragraph, paragraph].join('\n\n');
+
+    const chunks = splitForDisplay(text);
+    assert.ok(chunks.length > 1, 'long text must produce multiple chunks');
+    assert.equal(chunks.join('\n\n'), text, 'rejoined chunks must reproduce the text');
+    for (const chunk of chunks) {
+      assert.ok(chunk.length <= 2100, `chunk unexpectedly large: ${chunk.length}`);
+    }
+  });
+
+  it('does not split a single oversized paragraph', () => {
+    const huge = 'word '.repeat(600).trim();
+    assert.deepEqual(splitForDisplay(huge), [huge]);
   });
 });
 

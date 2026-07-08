@@ -31,7 +31,7 @@ claude -p --safe-mode --no-session-persistence --tools "" \
 - `--safe-mode` disables hooks, plugins, MCP, skills, and CLAUDE.md discovery **while keeping OAuth subscription auth**. Do not replace it with `--bare`: `--bare` reads auth only from `ANTHROPIC_API_KEY` and will fail on a subscription login.
 - `--system-prompt` replaces the (large) default system prompt with a ~100-token translator prompt.
 - The spawned process gets `CLAUDE_TRANSLATE_HOP=1`; every hook script exits immediately when it sees that variable — second layer of recursion protection.
-- Quota errors (`usage limit`, `limit reached`, `429`, …) trigger the fallback model once (`translator.doc_fallback_model`), then fail open: the original Russian text is used and prompt/response translation is paused via a quota-state file until a translation succeeds again.
+- Quota errors (`usage limit`, `limit reached`, `429`, …) trigger the fallback model once (`translator.doc_fallback_model`), then fail open: the original Russian text is used and prompt/display translation is paused via a quota latch (`doc-translate-quota.json`). The latch **auto-expires after 30 minutes** (`CLAUDE_TRANSLATE_QUOTA_TTL_MIN` to override) or clears on the next successful doc translation; while it is active the display hook reports it via a `systemMessage` instead of failing silently.
 
 ## Hook contracts
 
@@ -106,7 +106,9 @@ In headless (`--print`) runs the whole message arrives as a single `final: true`
 { "hookSpecificOutput": { "hookEventName": "MessageDisplay", "displayContent": "…русский перевод…" } }
 ```
 
-Display-only by platform design: the transcript, later turns, and compaction all keep the English text. While a reply streams you may briefly see English; the Russian text replaces it once the final chunk is translated. Replies already in Russian (cyrillic ratio ≥ 0.15), shorter than `display_min_chars`, or longer than `display_max_chars` pass through untouched. Cost is logged as `response_back_translated`. Hook timeout 60s, fail-open. The documented `message_text` shape is still accepted for forward compatibility.
+Display-only by platform design: the transcript, later turns, and compaction all keep the English text. While a reply streams you may briefly see English; the Russian text replaces it once the final chunk is translated. Replies already in Russian (cyrillic ratio ≥ 0.15), shorter than `display_min_chars`, or longer than `display_max_chars` pass through untouched. Cost is logged as `response_back_translated`. The documented `message_text` shape is still accepted for forward compatibility.
+
+Long replies are split by paragraphs (~1500-char chunks) and translated **in parallel**, so latency tracks the slowest chunk rather than the reply length; hook timeout 120s, fail-open (English shown on timeout). During a quota latch the hook returns a `systemMessage` explaining why the reply stays English.
 
 ### SessionStart → `translate-session-start.sh` → `claude-translate hook-session-start`
 
@@ -180,6 +182,7 @@ USD estimates use Haiku translate pricing for spend and a blended main-agent rat
 5. **Translate hops fail with auth errors** — you are on a subscription and something replaced `--safe-mode` with `--bare`, or `claude` is not logged in (`claude auth`).
 6. **Verify savings end-to-end** — `claude-translate resolve <ru-doc.md> --json` (expect `cache_hit`/`sibling_copy`/`translated`), then `claude-translate report --days 1`.
 7. **Double translations after installing the plugin** — if you previously merged hooks into `~/.claude/settings.json` manually, remove them; the plugin registers its own.
+8. **Replies suddenly show in English again** — most likely the quota latch: a translate hop hit the subscription usage limit and paused prompt/display translation. Check `~/.claude/translate-proxy/doc-translate-quota.json`; the latch expires on its own (30 min TTL, `CLAUDE_TRANSLATE_QUOTA_TTL_MIN` to override) and the display hook shows a `systemMessage` while it is active. Delete the file to unblock immediately. With core < 0.2.6 the latch never expired — update.
 
 ## Fail-open guarantees
 
