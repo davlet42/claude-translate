@@ -4,8 +4,9 @@
  * Usage: SOURCE=... node log-metrics.mjs < hook.json
  *
  * Sources:
- *   user_prompt    — UserPromptSubmit hook (reads .prompt)
- *   agent_response — Stop hook (extracts last assistant message from transcript_path)
+ *   user_prompt       — UserPromptSubmit hook (reads .prompt)
+ *   agent_response    — Stop hook (extracts last assistant message from transcript_path)
+ *   subagent_summary  — SubagentStop hook (same extraction from the subagent transcript)
  */
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -21,6 +22,7 @@ const SOURCE = process.env.SOURCE ?? 'unknown';
 const THRESHOLDS = {
   user_prompt: { minChars: 120, minCyrillic: 20 },
   agent_response: { minChars: 200, minCyrillic: 30 },
+  subagent_summary: { minChars: 100, minCyrillic: 10 },
 };
 
 function countCyrillic(text) {
@@ -88,6 +90,16 @@ function extractPayload(source, input) {
       const transcriptPath = input.transcript_path ?? null;
       const text = transcriptPath ? lastAssistantMessageFromTranscript(transcriptPath) : '';
       return { text, meta: {} };
+    }
+    case 'subagent_summary': {
+      const transcriptPath = input.transcript_path ?? null;
+      const text =
+        (typeof input.summary === 'string' && input.summary) ||
+        (transcriptPath ? lastAssistantMessageFromTranscript(transcriptPath) : '');
+      return {
+        text,
+        meta: { subagent_type: input.subagent_type ?? input.agent_type ?? null },
+      };
     }
     default:
       return { text: '', meta: {} };

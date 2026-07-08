@@ -8,8 +8,8 @@
     {
       "name": "claude-translate",
       "source": "./plugin",
-      "description": "Save tokens on Cyrillic text: lazy EN doc cache on Read, cheap Haiku translate tier, session metrics, MCP translate/resolve_doc",
-      "version": "0.2.1"
+      "description": "Save tokens on Cyrillic text: docs served as cached English translations on Read, assistant replies translated on display while the transcript stays English, CLAUDE.md kept in English from a Cyrillic source — via a cheap Haiku tier billed to your subscription. Metrics with real cost receipts, MCP translate/resolve_doc.",
+      "version": "0.3.0"
     }
   ]
 }

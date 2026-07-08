@@ -139,6 +139,7 @@ export async function runClaudeMd(args: string[]): Promise<void> {
     en_tokens_est: savings.enTokensEst,
     saved_tokens_est: savings.savedTokensEst,
     translate_cost_tokens_est: Math.ceil(ruRaw.length / 3) + Math.ceil(body.length / 4),
+    translate_cost_usd: result.costUsd,
     file_path: ruPath,
     cache_path: targetPath,
     translate_model: result.modelUsed,

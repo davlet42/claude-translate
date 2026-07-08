@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 (2026-07-08)
+
+- **Real cost tracking**: translate hops now run `claude -p --output-format json` and record the actual `total_cost_usd` receipt as `translate_cost_usd` in `metrics.jsonl` (doc cache, prompt/back-translate, display translation, `claudemd`). `report` shows `actual translate spend: $X.XXXX (N calls with claude receipts)` alongside the estimates. Requires `@cursor-translate/core` ≥ 0.2.3; with older cores everything still works on estimates.
+- **Subagent audit**: new `SubagentStop` hook logs `subagent_summary` opportunity metrics (parity with cursor-translate).
+- **Cloud playbook**: [docs/cloud-and-remote.md](./docs/cloud-and-remote.md) — committed EN `CLAUDE.md`/docs patterns, `claudemd --check` CI gate, MCP for cloud agents, verified vs unverified split.
+- **Listing polish**: plugin logo and rewritten marketplace description.
+- **Roadmap closed** (decisions, so nobody waits for these): *streaming-aware display translation* — rejected; the 0.2.1 delta-buffering already handles streamed messages correctly by translating once on the final chunk, and per-chunk translation of Russian word order would degrade quality. *Formal output-style preset* — rejected; the SessionStart english-replies instruction does the same job and the plugin output-style format is undocumented.
+
 ## 0.2.1 (2026-07-08)
 
 - **Fix display translation with the real MessageDisplay event shape.** The hooks docs describe a `message_text` field, but the actual event is a display stream: `{ message_id, turn_id, index, final, delta }`. The 0.2.0 hook read `message_text`, got nothing, and silently showed the original English reply. `hook-display` now buffers non-final deltas per `message_id` (`display-buffer.jsonl`) and translates the assembled text on the final chunk; the documented `message_text` shape is still accepted.

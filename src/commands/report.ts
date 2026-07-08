@@ -31,6 +31,7 @@ export interface MetricsEntry {
   en_tokens_est: number;
   saved_tokens_est: number;
   translate_cost_tokens_est?: number;
+  translate_cost_usd?: number;
   text_chars?: number;
   prompt_chars?: number;
   cyrillic_ratio?: number;
@@ -72,6 +73,8 @@ export interface ReportResult {
   operationalSavingsTokensEst: number;
   operationalTranslateCostTokensEst: number;
   operationalNetRoiTokensEst: number;
+  actualSpendUsd: number;
+  actualSpendEvents: number;
   metricsPath: string;
 }
 
@@ -94,6 +97,8 @@ function emptyReportResult(days: number, metricsPath: string): ReportResult {
     operationalSavingsTokensEst: 0,
     operationalTranslateCostTokensEst: 0,
     operationalNetRoiTokensEst: 0,
+    actualSpendUsd: 0,
+    actualSpendEvents: 0,
     metricsPath,
   };
 }
@@ -148,6 +153,8 @@ export async function runReport(args: string[]): Promise<ReportResult> {
   let docCacheServedEvents = 0;
   let docWarmupCostTokensEst = 0;
   let docIncrementalCostTokensEst = 0;
+  let actualSpendUsd = 0;
+  let actualSpendEvents = 0;
 
   for (const line of raw.split('\n')) {
     if (!line.trim()) {
@@ -221,6 +228,10 @@ export async function runReport(args: string[]): Promise<ReportResult> {
       if (source === 'prompt_translated' || source === 'response_back_translated') {
         promptTranslateCostTokensEst += cost;
       }
+      if (typeof entry.translate_cost_usd === 'number') {
+        actualSpendUsd += entry.translate_cost_usd;
+        actualSpendEvents += 1;
+      }
     }
   }
 
@@ -249,6 +260,8 @@ export async function runReport(args: string[]): Promise<ReportResult> {
     operationalSavingsTokensEst,
     operationalTranslateCostTokensEst,
     operationalNetRoiTokensEst,
+    actualSpendUsd,
+    actualSpendEvents,
     metricsPath,
   };
 }
@@ -294,10 +307,19 @@ export function formatReport(result: ReportResult): string {
     `    est. main-agent context saved: ~$${operationalSavingsUsd} (@ ~$3/1M)`,
     `    est. incremental translate spend: ~$${operationalSpendUsd} (${HAIKU_TRANSLATE_PRICING.rateLabel})`,
     `    est. net operational USD: ~$${operationalNetUsd} (saved − incremental spend)`,
+  ];
+
+  if (result.actualSpendEvents > 0) {
+    lines.push(
+      `    actual translate spend: $${result.actualSpendUsd.toFixed(4)} (${result.actualSpendEvents} calls with claude receipts)`,
+    );
+  }
+
+  lines.push(
     '',
     '  ROI investment (one-time doc cache warmup):',
     `    batch docs warmup cost: ~${result.docWarmupCostTokensEst} tokens (~$${warmupSpendUsd} ${HAIKU_TRANSLATE_PRICING.rateLabel})`,
-  ];
+  );
 
   if (breakEvenReads !== null) {
     lines.push(
@@ -352,6 +374,9 @@ export function formatReport(result: ReportResult): string {
   lines.push('    - operational ROI excludes warmup; use break-even reads to judge cache payback');
   lines.push(
     `    - translate spend USD uses ${HAIKU_TRANSLATE_PRICING.rateLabel} (default claude-haiku-4-5)`,
+  );
+  lines.push(
+    '    - actual translate spend = summed total_cost_usd receipts from claude -p (needs core ≥ 0.2.3)',
   );
 
   return lines.join('\n');

@@ -164,13 +164,9 @@ Custom translation rules: `.claude/claude-translate.md`, a `## claude-translate`
 ## Related docs
 
 - **[Runtime guide](./docs/runtime-guide.md)** — hook contracts (exact stdin/stdout JSON), config and env reference, metrics, troubleshooting, fail-open guarantees
+- **[Cloud and remote sessions](./docs/cloud-and-remote.md)** — what works on the web/CI, committed EN caches, `claudemd --check` gate
 - **[Publishing](./docs/publishing.md)** — npm release flow, CI, lockfile notes
 - **[Changelog](./CHANGELOG.md)**
-
-## Roadmap
-
-- Streaming-aware display translation (translate paragraphs as they render instead of per message).
-- A formal output-style preset as an alternative to the SessionStart english-replies instruction.
 
 ## License
 

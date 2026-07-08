@@ -112,9 +112,9 @@ Display-only by platform design: the transcript, later turns, and compaction all
 
 Prints a context note (stdout becomes session context): docs are served as English translations; edit originals, not the cache. When `response.english_replies` **and** `response.display_back_translate` are both true, it appends the instruction to reply in English (the display layer shows Russian). The instruction is deliberately suppressed if display translation is off — otherwise you would be stuck reading English.
 
-### UserPromptSubmit / Stop → audit scripts → `log-metrics.mjs`
+### UserPromptSubmit / Stop / SubagentStop → audit scripts → `log-metrics.mjs`
 
-Metrics only, never block. `user_prompt` reads the `prompt` field; `agent_response` extracts the last assistant message from `transcript_path` (JSONL). Both log "what auto-translation would have saved" to `metrics.jsonl`.
+Metrics only, never block. `user_prompt` reads the `prompt` field; `agent_response` extracts the last assistant message from `transcript_path` (JSONL); `subagent_summary` (SubagentStop) does the same for subagent transcripts. All log "what auto-translation would have saved" to `metrics.jsonl`.
 
 ## Config reference (`~/.claude/translate-proxy/config.yaml`)
 
@@ -164,6 +164,8 @@ Metrics only, never block. `user_prompt` reads the `prompt` field; `agent_respon
 | `user_prompt` / `agent_response` | Hook audits — what auto-translation would save | opportunity |
 
 USD estimates use Haiku translate pricing for spend and a blended main-agent rate for savings. `sibling_copy` events are savings with zero cost.
+
+**Actual receipts:** with `@cursor-translate/core` ≥ 0.2.3 every claude-cli translate hop runs `claude -p --output-format json` and stores the reported `total_cost_usd` as `translate_cost_usd` on the metrics entry. The report sums these into `actual translate spend: $X.XXXX (N calls with claude receipts)` — real money, not estimates. Entries without the field (older core, openai/cursor-cli providers) stay estimate-only.
 
 ## Troubleshooting
 

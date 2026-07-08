@@ -23,6 +23,7 @@ const HOOK_SCRIPTS = [
   'translate-display.sh',
   'translate-audit-prompt.sh',
   'translate-audit-stop.sh',
+  'translate-audit-subagent.sh',
   'translate-session-start.sh',
   'log-metrics.mjs',
 ] as const;
