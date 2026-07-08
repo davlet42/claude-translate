@@ -92,15 +92,21 @@ The model keeps seeing the **original** path. Trade-off: `Edit` old_string match
 
 Active only when `response.display_back_translate: true` (bash grep gate). Requires Claude Code ≥ 2.1.152.
 
-stdin: `{ "hook_event_name": "MessageDisplay", "message_text": "…assistant reply…", "cwd": "…" }`
+**Reality check (differs from the hooks docs):** there is no `message_text` field. The event is a display **stream** — one hook invocation per chunk:
 
-stdout when the reply is English prose within `display_min_chars`..`display_max_chars`:
+```json
+{ "hook_event_name": "MessageDisplay", "session_id": "…", "cwd": "…",
+  "turn_id": "…", "message_id": "…", "index": 0, "final": true,
+  "delta": "…text chunk…" }
+```
+
+In headless (`--print`) runs the whole message arrives as a single `final: true` delta; interactive sessions may fire many chunks per message. The hook buffers non-final deltas in `~/.claude/translate-proxy/display-buffer.jsonl` keyed by `message_id`, and on the final delta assembles the full text, translates it, and returns:
 
 ```json
 { "hookSpecificOutput": { "hookEventName": "MessageDisplay", "displayContent": "…русский перевод…" } }
 ```
 
-Display-only by platform design: the transcript, later turns, and compaction all keep the English text. Replies already in Russian (cyrillic ratio ≥ 0.15) pass through untouched. Cost is logged as `response_back_translated`. Latency ~1–4s per translated reply; hook timeout 30s, fail-open.
+Display-only by platform design: the transcript, later turns, and compaction all keep the English text. While a reply streams you may briefly see English; the Russian text replaces it once the final chunk is translated. Replies already in Russian (cyrillic ratio ≥ 0.15), shorter than `display_min_chars`, or longer than `display_max_chars` pass through untouched. Cost is logged as `response_back_translated`. Hook timeout 60s, fail-open. The documented `message_text` shape is still accepted for forward compatibility.
 
 ### SessionStart → `translate-session-start.sh` → `claude-translate hook-session-start`
 

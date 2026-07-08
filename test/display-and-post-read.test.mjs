@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { describe, it } from 'node:test';
@@ -82,34 +82,81 @@ describe('loadClaudeConfigExtras', () => {
 });
 
 describe('resolveDisplayFromHookInput (MessageDisplay contract)', () => {
+  const BUFFER = join(HOME, 'display-buffer.jsonl');
+
   it('does nothing when the feature is disabled', async () => {
     writeConfig({ display: false });
     const output = await resolveDisplayFromHookInput({
-      message_text: 'A long enough English assistant reply for the threshold check.',
+      delta: 'A long enough English assistant reply for the threshold check.',
+      message_id: 'm-disabled',
+      index: 0,
+      final: true,
     });
     assert.deepEqual(output, {});
   });
 
-  it('skips short messages', async () => {
+  it('buffers non-final deltas and returns nothing', async () => {
     writeConfig({ display: true });
-    const output = await resolveDisplayFromHookInput({ message_text: 'Short reply.' });
+    const output = await resolveDisplayFromHookInput({
+      delta: 'First streamed chunk of an English reply, ',
+      message_id: 'm-stream',
+      index: 0,
+      final: false,
+    });
+    assert.deepEqual(output, {});
+
+    const buffered = readFileSync(BUFFER, 'utf8');
+    assert.match(buffered, /m-stream/);
+    assert.match(buffered, /First streamed chunk/);
+  });
+
+  it('drains the buffer for the message on the final delta', async () => {
+    writeConfig({ display: true, enabled: false });
+    // enabled:false keeps the test hermetic (no claude spawn) while still
+    // exercising the buffer drain: the full text is assembled, then the
+    // translation layer skips as disabled.
+    const output = await resolveDisplayFromHookInput({
+      delta: 'and the final chunk long enough to pass the threshold together.',
+      message_id: 'm-stream',
+      index: 1,
+      final: true,
+    });
+    assert.deepEqual(output, {});
+
+    const buffered = readFileSync(BUFFER, 'utf8');
+    assert.ok(!buffered.includes('m-stream'), 'processed deltas must leave the buffer');
+    writeConfig({ display: true });
+  });
+
+  it('skips short final messages', async () => {
+    writeConfig({ display: true });
+    const output = await resolveDisplayFromHookInput({
+      delta: 'Short reply.',
+      message_id: 'm-short',
+      index: 0,
+      final: true,
+    });
     assert.deepEqual(output, {});
   });
 
   it('skips replies that are already Russian', async () => {
     writeConfig({ display: true });
     const output = await resolveDisplayFromHookInput({
-      message_text: 'Это уже русский ответ ассистента, переводить его обратно не нужно совсем.',
+      delta: 'Это уже русский ответ ассистента, переводить его обратно не нужно совсем.',
+      message_id: 'm-ru',
+      index: 0,
+      final: true,
     });
     assert.deepEqual(output, {});
   });
 
-  it('fails open when translation is globally disabled', async () => {
+  it('still supports the documented message_text shape', async () => {
     writeConfig({ display: true, enabled: false });
     const output = await resolveDisplayFromHookInput({
       message_text: 'A long enough English assistant reply for the threshold check.',
     });
     assert.deepEqual(output, {});
+    writeConfig({ display: true });
   });
 });
 

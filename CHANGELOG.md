@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 (2026-07-08)
+
+- **Fix display translation with the real MessageDisplay event shape.** The hooks docs describe a `message_text` field, but the actual event is a display stream: `{ message_id, turn_id, index, final, delta }`. The 0.2.0 hook read `message_text`, got nothing, and silently showed the original English reply. `hook-display` now buffers non-final deltas per `message_id` (`display-buffer.jsonl`) and translates the assembled text on the final chunk; the documented `message_text` shape is still accepted.
+- MessageDisplay hook timeout raised 30s → 60s for long replies.
+
 ## 0.2.0 (2026-07-08)
 
 Roadmap features — all opt-in via `~/.claude/translate-proxy/config.yaml`:

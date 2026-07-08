@@ -1,6 +1,6 @@
 {
   "name": "claude-translate",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Save tokens on Cyrillic text: lazy EN doc cache on Read (PreToolUse), cheap Haiku translate tier via your subscription, session metrics, MCP translate/resolve_doc",
   "author": {
     "name": "davlet42"
