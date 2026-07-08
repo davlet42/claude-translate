@@ -336,8 +336,8 @@ export function formatReport(result: ReportResult): string {
     `    total translate spend: ~${result.translateCostTokensEst} tokens`,
     `    net ROI: ~${formatSignedTokens(result.netDocRoiTokensEst)} tokens`,
     '',
-    '  opportunity (IDE hooks — audit only):',
-    `    potential if RU→EN applied in IDE: ~${result.opportunityTokensEst} tokens`,
+    '  opportunity (session hooks — audit only):',
+    `    potential if RU→EN applied in session: ~${result.opportunityTokensEst} tokens`,
     '',
     '  by source:',
   );
@@ -370,7 +370,7 @@ export function formatReport(result: ReportResult): string {
   lines.push('    - prompt_translated = RU→EN via CLI prompt/agent or MCP translate tool');
   lines.push('    - doc_translate_cost (warmup) = batch `claude-translate docs` — one-time cache investment');
   lines.push('    - doc_translate_cost (incremental) = on-demand translate (cache miss/stale)');
-  lines.push('    - user_prompt/agent_response = IDE audit only (not auto-translated in IDE)');
+  lines.push('    - user_prompt/agent_response = session audit only (hooks log opportunity; prompts are not auto-translated)');
   lines.push('    - operational ROI excludes warmup; use break-even reads to judge cache payback');
   lines.push(
     `    - translate spend USD uses ${HAIKU_TRANSLATE_PRICING.rateLabel} (default claude-haiku-4-5)`,
