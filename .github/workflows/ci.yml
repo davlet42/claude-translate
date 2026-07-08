@@ -14,9 +14,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: npm
 
-      # No lockfile until @cursor-translate/core@0.2.0 is published; plain install.
-      - run: npm install
+      - run: npm ci
       - run: npm test
