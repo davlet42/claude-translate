@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 (2026-07-08)
+
+- **Lazy read deferral hints**: `systemMessage` on skipped large-doc reads with estimated warmup cost and per-read savings (requires `@cursor-translate/core` ≥ 0.2.4).
+- **Report wording**: session hooks, not IDE.
+- Config/runtime docs for `lazy_read_*` and `cache.incremental: section`.
+
 ## 0.3.0 (2026-07-08)
 
 - **Real cost tracking**: translate hops now run `claude -p --output-format json` and record the actual `total_cost_usd` receipt as `translate_cost_usd` in `metrics.jsonl` (doc cache, prompt/back-translate, display translation, `claudemd`). `report` shows `actual translate spend: $X.XXXX (N calls with claude receipts)` alongside the estimates. Requires `@cursor-translate/core` ≥ 0.2.3; with older cores everything still works on estimates.

@@ -169,7 +169,7 @@ Metrics only, never block. `user_prompt` reads the `prompt` field; `agent_respon
 
 USD estimates use Haiku translate pricing for spend and a blended main-agent rate for savings. `sibling_copy` events are savings with zero cost.
 
-**Actual receipts:** with `@cursor-translate/core` ≥ 0.2.3 every claude-cli translate hop runs `claude -p --output-format json` and stores the reported `total_cost_usd` as `translate_cost_usd` on the metrics entry. The report sums these into `actual translate spend: $X.XXXX (N calls with claude receipts)` — real money, not estimates. Entries without the field (older core, openai/cursor-cli providers) stay estimate-only.
+**Actual receipts:** with `@cursor-translate/core` ≥ 0.2.4 every claude-cli translate hop runs `claude -p --output-format json` and stores the reported `total_cost_usd` as `translate_cost_usd` on the metrics entry. The report sums these into `actual translate spend: $X.XXXX (N calls with claude receipts)` — real money, not estimates. Entries without the field (older core, openai/cursor-cli providers) stay estimate-only.
 
 ## Troubleshooting
 

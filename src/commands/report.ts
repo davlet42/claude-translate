@@ -376,7 +376,7 @@ export function formatReport(result: ReportResult): string {
     `    - translate spend USD uses ${HAIKU_TRANSLATE_PRICING.rateLabel} (default claude-haiku-4-5)`,
   );
   lines.push(
-    '    - actual translate spend = summed total_cost_usd receipts from claude -p (needs core ≥ 0.2.3)',
+    '    - actual translate spend = summed total_cost_usd receipts from claude -p (needs core ≥ 0.2.4)',
   );
 
   return lines.join('\n');
