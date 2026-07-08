@@ -7,6 +7,8 @@ import {
   resolveMetricsPathFromEnv,
 } from '../helpers/report-helpers.js';
 import { resolveClaudeTranslateHome } from '../claude-env.js';
+import { HAIKU_TRANSLATE_PRICING } from '../constants/haiku-translate-pricing.constant.js';
+import { formatUsdFromHaikuTranslateTokens } from '../helpers/format-usd-from-haiku-translate-tokens.js';
 
 const DEFAULT_METRICS_PATH = join(resolveClaudeTranslateHome(), 'metrics.jsonl');
 
@@ -256,15 +258,6 @@ function formatUsdFromMainAgentTokens(tokens: number): string {
   return (tokens * blendedRate).toFixed(2);
 }
 
-function formatUsdFromNanoTokens(tokens: number): string {
-  const inputShare = 0.7;
-  const outputShare = 0.3;
-  const inputRate = 0.05 / 1_000_000;
-  const outputRate = 0.4 / 1_000_000;
-  const usd = tokens * inputShare * inputRate + tokens * outputShare * outputRate;
-  return usd.toFixed(2);
-}
-
 function formatSignedTokens(value: number): string {
   if (value > 0) {
     return `+${value}`;
@@ -274,11 +267,13 @@ function formatSignedTokens(value: number): string {
 
 export function formatReport(result: ReportResult): string {
   const operationalSavingsUsd = formatUsdFromMainAgentTokens(result.operationalSavingsTokensEst);
-  const operationalSpendUsd = formatUsdFromNanoTokens(result.operationalTranslateCostTokensEst);
+  const operationalSpendUsd = formatUsdFromHaikuTranslateTokens(
+    result.operationalTranslateCostTokensEst,
+  );
   const operationalNetUsd = (
     Number(operationalSavingsUsd) - Number(operationalSpendUsd)
   ).toFixed(2);
-  const warmupSpendUsd = formatUsdFromNanoTokens(result.docWarmupCostTokensEst);
+  const warmupSpendUsd = formatUsdFromHaikuTranslateTokens(result.docWarmupCostTokensEst);
   const breakEvenReads = estimateBreakEvenReads(
     result.docWarmupCostTokensEst,
     result.docSavingsTokensEst,
@@ -297,11 +292,11 @@ export function formatReport(result: ReportResult): string {
     `    prompt/back-translate cost: ~${result.promptTranslateCostTokensEst} tokens`,
     `    net operational ROI: ~${formatSignedTokens(result.operationalNetRoiTokensEst)} tokens`,
     `    est. main-agent context saved: ~$${operationalSavingsUsd} (@ ~$3/1M)`,
-    `    est. incremental translate spend: ~$${operationalSpendUsd} (@ nano rates)`,
+    `    est. incremental translate spend: ~$${operationalSpendUsd} (${HAIKU_TRANSLATE_PRICING.rateLabel})`,
     `    est. net operational USD: ~$${operationalNetUsd} (saved − incremental spend)`,
     '',
     '  ROI investment (one-time doc cache warmup):',
-    `    batch docs warmup cost: ~${result.docWarmupCostTokensEst} tokens (~$${warmupSpendUsd} @ nano rates)`,
+    `    batch docs warmup cost: ~${result.docWarmupCostTokensEst} tokens (~$${warmupSpendUsd} ${HAIKU_TRANSLATE_PRICING.rateLabel})`,
   ];
 
   if (breakEvenReads !== null) {
@@ -355,6 +350,9 @@ export function formatReport(result: ReportResult): string {
   lines.push('    - doc_translate_cost (incremental) = on-demand translate (cache miss/stale)');
   lines.push('    - user_prompt/agent_response = IDE audit only (not auto-translated in IDE)');
   lines.push('    - operational ROI excludes warmup; use break-even reads to judge cache payback');
+  lines.push(
+    `    - translate spend USD uses ${HAIKU_TRANSLATE_PRICING.rateLabel} (default claude-haiku-4-5)`,
+  );
 
   return lines.join('\n');
 }
