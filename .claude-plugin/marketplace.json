@@ -1,0 +1,15 @@
+{
+  "name": "claude-translate",
+  "owner": {
+    "name": "davlet42"
+  },
+  "description": "Token-saving RU→EN translation layer for Claude Code",
+  "plugins": [
+    {
+      "name": "claude-translate",
+      "source": "./plugin",
+      "description": "Save tokens on Cyrillic text: lazy EN doc cache on Read, cheap Haiku translate tier, session metrics, MCP translate/resolve_doc",
+      "version": "0.1.0"
+    }
+  ]
+}

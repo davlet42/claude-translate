@@ -1,0 +1,48 @@
+enabled: true
+
+min_cyrillic_ratio: 0.15
+min_chars_to_translate: 120
+
+translator:
+  # Default: Claude subscription via `claude -p --safe-mode` — no separate API key.
+  provider: claude-cli
+  # Cheap translate tier only (your main Claude Code model is unchanged).
+  model: claude-haiku-4-5
+  # When the primary tier hits usage limits, doc cache retries with this model.
+  doc_fallback_model: claude-sonnet-5
+  # CI/headless only:
+  # provider: openai
+  # model: gpt-5-nano
+
+response:
+  user_language: ru
+  # CLI wrapper (claude-translate agent) — skipped automatically on quota exhaustion.
+  prompt_translate: true
+  back_translate: true
+
+cache:
+  location: global
+  dir: ~/.claude/translate-proxy/cache
+  ttl_days: 30
+  # Reuse fresh entries from a sibling install (cursor-translate) before
+  # re-translating. Override candidates: CLAUDE_TRANSLATE_SIBLING_HOMES.
+  share_siblings: true
+
+glossary:
+  file: ~/.claude/translate-proxy/glossary.yaml
+  merge_project: true
+  project_file: .claude/claude-translate-glossary.yaml
+
+# Optional global translate rules (see also project CLAUDE.md § claude-translate):
+# rules_file: ~/.claude/translate-proxy/claude-translate-rules.md
+
+metrics:
+  log_path: ~/.claude/translate-proxy/metrics.jsonl
+
+safety:
+  fail_open: true
+  max_latency_ms: 2500
+
+hooks:
+  audit_enabled: true
+  lazy_read_timeout_sec: 600

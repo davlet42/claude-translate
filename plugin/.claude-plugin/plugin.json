@@ -1,0 +1,20 @@
+{
+  "name": "claude-translate",
+  "version": "0.1.0",
+  "description": "Save tokens on Cyrillic text: lazy EN doc cache on Read (PreToolUse), cheap Haiku translate tier via your subscription, session metrics, MCP translate/resolve_doc",
+  "author": {
+    "name": "davlet42"
+  },
+  "homepage": "https://github.com/davlet42/claude-translate",
+  "repository": "https://github.com/davlet42/claude-translate",
+  "license": "MIT",
+  "keywords": [
+    "translation",
+    "cyrillic",
+    "russian",
+    "tokens",
+    "mcp",
+    "i18n",
+    "hooks"
+  ]
+}

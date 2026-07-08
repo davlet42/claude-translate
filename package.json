@@ -1,0 +1,50 @@
+{
+  "name": "claude-translate",
+  "version": "0.1.0",
+  "description": "Save tokens on Cyrillic text in Claude Code: cheap Haiku translate tier, lazy EN doc cache via PreToolUse hook, CLAUDE.md sync, MCP",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davlet42/claude-translate.git"
+  },
+  "homepage": "https://github.com/davlet42/claude-translate",
+  "bin": {
+    "claude-translate": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "plugin",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run build",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "npm run build && node --test test/*.test.mjs"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "translation",
+    "cyrillic",
+    "russian",
+    "tokens",
+    "mcp",
+    "hooks",
+    "plugin"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@cursor-translate/core": "^0.2.0"
+  },
+  "optionalDependencies": {
+    "@cursor-translate/mcp": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}

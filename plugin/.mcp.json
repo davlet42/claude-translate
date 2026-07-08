@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "claude-translate": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "exec \"${CLAUDE_TRANSLATE_HOME:-$HOME/.claude/translate-proxy}/bin/claude-translate-mcp\""
+      ]
+    }
+  }
+}

@@ -1,0 +1,19 @@
+# Default glossary — extend per project in .claude/claude-translate-glossary.yaml
+
+exact:
+  - CLAUDE.md
+  - ROADMAP.md
+  - npm run
+  - docker compose
+  - Prisma
+  - NestJS
+
+patterns:
+  - 'src/[\w./-]+'
+  - '`[^`]+`'
+  - 'AUD-[A-Z]+-\d+'
+  - 'BL-\d+'
+  - 'P\d+\.\d+'
+  - 'gh pr \d+'
+
+replacements: {}
