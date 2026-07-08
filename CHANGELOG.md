@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.4 (2026-07-08)
+
+- **Full economy report** (via `@cursor-translate/core` ≥ 0.2.7): `ROI full economy` section includes display transcript EN savings; `user_prompt` labeled as interactive-session opportunity (terminal `claude` with plugin, not `claude-translate agent`).
+
 ## 0.3.3 (2026-07-08)
 
 Fixes the "replies suddenly show in English again" failure chain (requires `@cursor-translate/core` ≥ 0.2.6):
