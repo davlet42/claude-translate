@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.2 (2026-07-08)
+
+- **Fix section cache flat file** (via `@cursor-translate/core` ≥ 0.2.5): `claude-translate doc` no longer leaves only `*.en.sections.json` without the flat `*.en.md`; read-path self-heal rebuilds missing flat caches from sidecars.
+
 ## 0.3.1 (2026-07-08)
 
 - **Lazy read deferral hints**: `systemMessage` on skipped large-doc reads with estimated warmup cost and per-read savings (requires `@cursor-translate/core` ≥ 0.2.4).

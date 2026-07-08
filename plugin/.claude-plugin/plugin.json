@@ -1,6 +1,6 @@
 {
   "name": "claude-translate",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Save tokens on Cyrillic text: docs served as cached English translations on Read, assistant replies translated on display while the transcript stays English, CLAUDE.md kept in English from a Cyrillic source — via a cheap Haiku tier billed to your subscription. Metrics with real cost receipts, MCP translate/resolve_doc.",
   "logo": "assets/logo.svg",
   "author": {
