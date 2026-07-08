@@ -9,7 +9,7 @@
       "name": "claude-translate",
       "source": "./plugin",
       "description": "Save tokens on Cyrillic text: lazy EN doc cache on Read, cheap Haiku translate tier, session metrics, MCP translate/resolve_doc",
-      "version": "0.1.0"
+      "version": "0.2.0"
     }
   ]
 }

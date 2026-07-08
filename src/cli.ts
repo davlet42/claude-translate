@@ -41,6 +41,21 @@ async function main(): Promise<void> {
       await runHookResolve();
       break;
     }
+    case 'hook-display': {
+      const { runHookDisplay } = await import('./commands/hook-display.js');
+      await runHookDisplay();
+      break;
+    }
+    case 'hook-post-read': {
+      const { runHookPostRead } = await import('./commands/hook-post-read.js');
+      await runHookPostRead();
+      break;
+    }
+    case 'hook-session-start': {
+      const { runHookSessionStart } = await import('./commands/hook-session-start.js');
+      await runHookSessionStart();
+      break;
+    }
     case 'prompt': {
       const { runPrompt } = await import('./commands/prompt.js');
       await runPrompt(args.slice(1));
@@ -136,6 +151,9 @@ Usage:
   claude-translate claudemd [path] [--check] [--force] [--dry-run]
   claude-translate resolve <file> [--json] [--project slug] [--force]
   claude-translate hook-resolve                    (stdin JSON → PreToolUse Read)
+  claude-translate hook-post-read                  (stdin JSON → PostToolUse Read, lazy_read_mode: content)
+  claude-translate hook-display                    (stdin JSON → MessageDisplay RU display translation)
+  claude-translate hook-session-start              (SessionStart context note)
   claude-translate prompt "<text>" [--json] [--force] [--stdin]
   claude-translate agent [claude flags] -- "<prompt>" [--json] [--no-back-translate]
   claude-translate report [--days 7] [--backfill-costs] [--project slug]

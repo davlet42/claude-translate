@@ -51,6 +51,13 @@ export async function runResolveFromHookInput(
     return {};
   }
 
+  const { loadClaudeConfigExtras } = await import('../helpers/load-claude-config-extras.js');
+  const extras = await loadClaudeConfigExtras();
+  if (extras.lazyReadMode === 'content') {
+    // The PostToolUse hook replaces the tool output instead; leave the Read untouched.
+    return {};
+  }
+
   const cwd = typeof hookInput.cwd === 'string' ? hookInput.cwd : undefined;
   const result = await resolveDocForRead({ sourcePath: filePath, cwd });
 

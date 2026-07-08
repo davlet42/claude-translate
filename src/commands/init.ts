@@ -19,6 +19,8 @@ const TRANSLATE_HOME = resolveClaudeTranslateHome();
 // point ~/.claude/settings.json hooks at stable paths.
 const HOOK_SCRIPTS = [
   'translate-lazy-read.sh',
+  'translate-post-read.sh',
+  'translate-display.sh',
   'translate-audit-prompt.sh',
   'translate-audit-stop.sh',
   'translate-session-start.sh',

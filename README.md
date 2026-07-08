@@ -13,10 +13,11 @@ Built on the same engine as [cursor-translate](https://github.com/davlet42/curso
 | Lazy EN doc cache on `Read` of Cyrillic `.md`/`.mdx` | ✅ PreToolUse hook rewrites `file_path` | ✅ same |
 | English `CLAUDE.md` from Russian source (`claudemd`) | ✅ saves on **every session start** | ✅ |
 | Auto-translate your prompt | ❌ audit only (platform limit) | ✅ RU→EN before the main model |
-| Auto back-translate the reply | ❌ audit only (roadmap: MessageDisplay) | ✅ EN→RU after the main model |
+| Show replies in Russian (display-only, transcript stays EN) | ✅ opt-in `display_back_translate` (MessageDisplay hook) | ✅ EN→RU after the main model |
+| English replies for output-token savings | ✅ opt-in `english_replies` (SessionStart instruction) | ✅ default behavior |
 | MCP `translate` / `resolve_doc` | ✅ explicit tools | ✅ |
 
-**Honest positioning:** Claude Code's `UserPromptSubmit` hook cannot rewrite your prompt (block + add context only), and no hook can transform the assistant's transcript text. So in the interactive UI the automatic win is **docs + CLAUDE.md**; the full RU→EN→agent→RU loop needs the CLI wrapper. `PreToolUse` **can** rewrite tool input (`hookSpecificOutput.updatedInput`) — that is how lazy read works.
+**Honest positioning:** Claude Code's `UserPromptSubmit` hook cannot rewrite your prompt (block + add context only), and no hook can transform the assistant's **transcript** text — so your Russian prompts still go to the model as-is; the full RU→EN→agent→RU loop needs the CLI wrapper. What hooks *can* do is rewrite tool input (`PreToolUse.updatedInput` — lazy read), replace tool results (`PostToolUse.updatedToolOutput` — content mode), and transform the **displayed** reply only (`MessageDisplay.displayContent` — Russian on screen, English in the transcript).
 
 ## Two-tier model strategy
 
@@ -83,6 +84,27 @@ claude-translate report --days 7  # savings vs costs
 
 The plugin's `PreToolUse` hook (matcher `Read`): if the file is `.md`/`.mdx` with Cyrillic and the cache is missing or stale (sha mismatch), it translates via Haiku, caches under `~/.claude/translate-proxy/cache/<project>/…en.md`, and rewrites the tool call's `file_path` to the cache. It also injects a context note telling Claude to edit the **original** file, never the cache. Everything fails open: no CLI, quota exhausted, timeout → the original Russian file is read.
 
+### Russian on screen, English in the transcript (display translation)
+
+Enable in `~/.claude/translate-proxy/config.yaml`:
+
+```yaml
+response:
+  display_back_translate: true   # MessageDisplay hook: RU on screen, EN in transcript
+  english_replies: true          # optional: ask the model to reply in English (~2× fewer output tokens)
+```
+
+With both on, the model is instructed (via SessionStart) to answer in English, and the `MessageDisplay` hook translates each displayed reply to Russian through Haiku. The transcript keeps the English text, so later turns and compactions stay cheap. Latency: ~1–4s per displayed English reply; replies shorter than `display_min_chars` (80) or longer than `display_max_chars` (12000), and replies already in Russian, are shown as-is. Requires Claude Code ≥ 2.1.152.
+
+### Content mode: replace the Read result instead of the path
+
+```yaml
+hooks:
+  lazy_read_mode: content   # default: path
+```
+
+In `content` mode the `PostToolUse` hook swaps the Read result's `file.content` for the English translation while the model keeps seeing the **original** file path — no cache-path confusion in references. Trade-off: `Edit` old_string matching against the Russian file will not line up with what the model read, so prefer `path` mode for docs you expect the agent to edit.
+
 ### Shared cache with cursor-translate
 
 Before spending on a translation, the doc cache checks the **sibling install** — [cursor-translate](https://github.com/davlet42/cursor-translate) keeps the same cache format under `~/.cursor/translate-proxy`. A fresh entry (sha match against the current source) is copied over as `action: sibling_copy` with zero translate cost; only if the sibling is also missing or stale does a real translation run. Works in both directions: docs you translated in Cursor are reused by Claude Code and vice versa.
@@ -114,7 +136,7 @@ User RU → Haiku (translate in)
 
 ## Plugin contents
 
-- **Hooks:** `PreToolUse` lazy read (600s timeout), `UserPromptSubmit`/`Stop` opportunity audits, `SessionStart` context note. All guarded by `CLAUDE_TRANSLATE_HOP=1` against recursion.
+- **Hooks:** `PreToolUse` lazy read (600s timeout), `PostToolUse` content mode, `MessageDisplay` display translation, `UserPromptSubmit`/`Stop` opportunity audits, `SessionStart` context note (adds the english-replies instruction when enabled). All guarded by `CLAUDE_TRANSLATE_HOP=1` against recursion; disabled features exit before booting node.
 - **MCP:** `translate` + `resolve_doc` (reuses `@cursor-translate/mcp`; wrapper installed by `init` exports the Claude home).
 - **Slash commands:** `/translate-docs` (warm cache), `/translate-report` (metrics summary).
 
@@ -139,11 +161,16 @@ translator:
 
 Custom translation rules: `.claude/claude-translate.md`, a `## claude-translate` section in `CLAUDE.md`/`AGENTS.md`, or `~/.claude/translate-proxy/claude-translate-rules.md`. Project glossary: `.claude/claude-translate-glossary.yaml`.
 
+## Related docs
+
+- **[Runtime guide](./docs/runtime-guide.md)** — hook contracts (exact stdin/stdout JSON), config and env reference, metrics, troubleshooting, fail-open guarantees
+- **[Publishing](./docs/publishing.md)** — npm release flow, CI, lockfile notes
+- **[Changelog](./CHANGELOG.md)**
+
 ## Roadmap
 
-- **MessageDisplay back-translate** — Claude Code's `MessageDisplay` hook can transform *displayed* text only: show replies in Russian while the transcript stays English (saves output tokens on every turn). Needs latency tuning.
-- **PostToolUse variant** — serve EN content via `updatedToolOutput` without changing the path.
-- Output-style preset nudging English-only replies for maximum savings with display-side RU.
+- Streaming-aware display translation (translate paragraphs as they render instead of per message).
+- A formal output-style preset as an alternative to the SessionStart english-replies instruction.
 
 ## License
 

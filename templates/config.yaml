@@ -19,6 +19,16 @@ response:
   # CLI wrapper (claude-translate agent) — skipped automatically on quota exhaustion.
   prompt_translate: true
   back_translate: true
+  # Display-only RU translation of assistant replies (MessageDisplay hook):
+  # the transcript stays English (cheap for later turns), your screen shows
+  # Russian. Adds ~1-4s Haiku latency per displayed English reply.
+  display_back_translate: false
+  display_min_chars: 80
+  display_max_chars: 12000
+  # Ask the model to reply in English even to Russian prompts (SessionStart
+  # instruction) — saves ~2x on output tokens. Only applied when
+  # display_back_translate is also true, so you still read Russian.
+  english_replies: false
 
 cache:
   location: global
@@ -46,3 +56,8 @@ safety:
 hooks:
   audit_enabled: true
   lazy_read_timeout_sec: 600
+  # path    — PreToolUse rewrites file_path to the EN cache (default).
+  # content — PostToolUse replaces the Read result text instead; the path the
+  #           model sees stays the original (no cache-path confusion, but Edit
+  #           old_string matching against the file will not line up).
+  lazy_read_mode: path
