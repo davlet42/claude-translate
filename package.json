@@ -1,6 +1,6 @@
 {
   "name": "claude-translate",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Save tokens on Cyrillic text in Claude Code: cheap Haiku translate tier, lazy EN doc cache via PreToolUse hook, CLAUDE.md sync, MCP",
   "license": "MIT",
   "type": "module",
@@ -10,7 +10,7 @@
   },
   "homepage": "https://github.com/davlet42/claude-translate",
   "bin": {
-    "claude-translate": "./dist/cli.js"
+    "claude-translate": "dist/cli.js"
   },
   "files": [
     "dist",
