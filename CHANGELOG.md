@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.6 (2026-07-12)
 
 - **README repositioned around the measured value.** The core (and the focus) is the Cyrillic doc cache + English `CLAUDE.md` — with the honest economics (translation is an investment per doc version repaid in a few reads; edits are cheap thanks to section-incremental re-translation; savings scale with how much Cyrillic markdown agents read) and `claude-translate report` promoted so users pull their own numbers. Display translation, the headless `agent` wrapper, MCP tools and audits moved under "Extras (opt-in, off by default, experimental)", with an explicit note that all of them are toggled in the user's local `~/.claude/translate-proxy/config.yaml`.
 - **Release tooling:** `scripts/sync-plugin-version.mjs` keeps `plugin/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` on the `package.json` version — synced automatically on `npm version`, verified on `prepack` (publish fails on drift). Fixes the v0.3.5 situation where npm/GitHub shipped the release while the plugin marketplace still offered 0.3.4.
