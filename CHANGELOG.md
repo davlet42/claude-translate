@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Release tooling:** `scripts/sync-plugin-version.mjs` keeps `plugin/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` on the `package.json` version — synced automatically on `npm version`, verified on `prepack` (publish fails on drift). Fixes the v0.3.5 situation where npm/GitHub shipped the release while the plugin marketplace still offered 0.3.4.
+
 ## 0.3.5 (2026-07-12)
 
 Display translation rebuilt around how Claude Code actually dispatches `MessageDisplay` (diagnosed live 2026-07-11/12 on CC 2.1.204):

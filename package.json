@@ -19,9 +19,10 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepack": "npm run build",
+    "prepack": "node scripts/sync-plugin-version.mjs --check && npm run build",
     "dev": "tsc -p tsconfig.json --watch",
-    "test": "npm run build && node --test test/*.test.mjs"
+    "test": "npm run build && node --test test/*.test.mjs",
+    "version": "node scripts/sync-plugin-version.mjs && git add plugin/.claude-plugin/plugin.json .claude-plugin/marketplace.json"
   },
   "keywords": [
     "claude",
