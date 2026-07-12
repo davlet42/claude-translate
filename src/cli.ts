@@ -77,6 +77,11 @@ async function main(): Promise<void> {
       console.log(formatReport(result));
       break;
     }
+    case 'cache-gc': {
+      const { runCacheGc } = await import('./commands/cache-gc.js');
+      await runCacheGc(args.slice(1));
+      break;
+    }
     case 'backfill-costs': {
       const { runBackfillCosts } = await import('./commands/backfill-costs.js');
       await runBackfillCosts(args.slice(1));
@@ -158,6 +163,7 @@ Usage:
   claude-translate agent [claude flags] -- "<prompt>" [--json] [--no-back-translate]
   claude-translate report [--days 7] [--backfill-costs] [--project slug]
   claude-translate backfill-costs [--project slug] [--dry-run]
+  claude-translate cache-gc [--dry-run] [--days 30]  (drop caches of deleted docs)
 
 Docs: https://github.com/davlet42/claude-translate
 `);

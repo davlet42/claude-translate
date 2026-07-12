@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.7 (2026-07-12)
+
+- **Orphan cache GC** (via `@cursor-translate/core` ≥ 0.2.11): caches of deleted/renamed docs used to live forever (invalidation is sha-based only). New `claude-translate cache-gc [--dry-run] [--days N]` command plus a throttled auto-sweep on the translate path (at most once a day): a cache whose source has been missing for over `cache.gc_orphan_days` (default 30, `0` disables) is removed together with its `.en.sections.json` sidecar. The grace period protects git branch switches; runs are logged as `source: "cache_gc"`.
+- **Config:** the dead `cache.ttl_days` template key (parsed nowhere) replaced by `cache.gc_orphan_days`.
+
 ## 0.3.6 (2026-07-12)
 
 - **README repositioned around the measured value.** The core (and the focus) is the Cyrillic doc cache + English `CLAUDE.md` — with the honest economics (translation is an investment per doc version repaid in a few reads; edits are cheap thanks to section-incremental re-translation; savings scale with how much Cyrillic markdown agents read) and `claude-translate report` promoted so users pull their own numbers. Display translation, the headless `agent` wrapper, MCP tools and audits moved under "Extras (opt-in, off by default, experimental)", with an explicit note that all of them are toggled in the user's local `~/.claude/translate-proxy/config.yaml`.

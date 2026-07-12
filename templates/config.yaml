@@ -33,7 +33,9 @@ response:
 cache:
   location: global
   dir: ~/.claude/translate-proxy/cache
-  ttl_days: 30
+  # Orphan GC: caches of deleted/renamed docs are removed after the source
+  # has been missing this many days (branch switches stay safe). 0 disables.
+  gc_orphan_days: 30
   # Reuse fresh entries from a sibling install (cursor-translate) before
   # re-translating. Override candidates: CLAUDE_TRANSLATE_SIBLING_HOMES.
   share_siblings: true
