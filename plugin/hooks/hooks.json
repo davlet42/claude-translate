@@ -30,7 +30,7 @@
           {
             "type": "command",
             "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/translate-display.sh\"",
-            "timeout": 120
+            "timeout": 600
           }
         ]
       }

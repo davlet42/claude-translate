@@ -13,7 +13,7 @@ Built on the same engine as [cursor-translate](https://github.com/davlet42/curso
 | Lazy EN doc cache on `Read` of Cyrillic `.md`/`.mdx` | ✅ PreToolUse hook rewrites `file_path` | ✅ same |
 | English `CLAUDE.md` from Russian source (`claudemd`) | ✅ saves on **every session start** | ✅ |
 | Auto-translate your prompt | ❌ audit only (platform limit) | ✅ RU→EN before the main model |
-| Show replies in Russian (display-only, transcript stays EN) | ✅ opt-in `display_back_translate` (MessageDisplay hook) | ✅ EN→RU after the main model |
+| Show replies in Russian (display-only, **replaces the English render after a delay** — see caveat below) | ✅ opt-in `display_back_translate` (MessageDisplay hook) | ✅ EN→RU after the main model |
 | English replies for output-token savings | ✅ opt-in `english_replies` (SessionStart instruction) | ✅ default behavior |
 | MCP `translate` / `resolve_doc` | ✅ explicit tools | ✅ |
 
@@ -86,15 +86,19 @@ The plugin's `PreToolUse` hook (matcher `Read`): if the file is `.md`/`.mdx` wit
 
 ### Russian on screen, English in the transcript (display translation)
 
+> **Read this first — it is not real-time.** `MessageDisplay` is a post-render hook: every reply appears in **English first** and is replaced with Russian only when the translation lands. The translate tier runs on your own Claude subscription (`claude -p`, Haiku), so it queues behind everything else your account is doing: roughly 10–60 s per reply on an idle account, and **minutes** while parallel agent sessions hammer the same subscription. Treat this mode as *eventual Russian* in exchange for output-token savings. If you want replies in Russian **immediately**, leave both flags off (the default): the model simply answers in Russian — at the cost of ~1.5–2× output tokens on replies and a slightly heavier transcript, while skipping the Haiku translate spend entirely.
+
 Enable in `~/.claude/translate-proxy/config.yaml`:
 
 ```yaml
 response:
-  display_back_translate: true   # MessageDisplay hook: RU on screen, EN in transcript
-  english_replies: true          # optional: ask the model to reply in English (~2× fewer output tokens)
+  display_back_translate: true   # MessageDisplay hook: RU on screen (eventually), EN in transcript
+  english_replies: true          # ask the model to reply in English (~2× fewer output tokens)
 ```
 
-With both on, the model is instructed (via SessionStart) to answer in English, and the `MessageDisplay` hook translates each displayed reply to Russian through Haiku. The transcript keeps the English text, so later turns and compactions stay cheap. Latency: ~1–4s per displayed English reply; replies shorter than `display_min_chars` (80) or longer than `display_max_chars` (12000), and replies already in Russian, are shown as-is. Requires Claude Code ≥ 2.1.152.
+With both on, the model is instructed (via SessionStart) to answer in English, and the `MessageDisplay` hook translates each displayed reply to Russian through Haiku. The transcript keeps the English text, so later turns and compactions stay cheap.
+
+Mechanics (v0.3.5): Claude Code dispatches the chunk events of one message **concurrently**, so on the final chunk the hook resolves the full message text from the session transcript (`transcript_path`) instead of reassembling buffered deltas; mixed-language replies are segmented per paragraph (Russian paragraphs pass through verbatim, only English runs are translated); the hook timeout is 600 s to survive subscription throttling. Every outcome is logged to `metrics.jsonl` as `source: "display_hook"` (`displayed`, `unchanged`, `already_russian`, `below_min_chars`, `above_max_chars`, `quota_latched`, `unrecognized_payload`, `hook_error`) — `grep display_hook` answers "why was this reply shown in English". Replies shorter than `display_min_chars` (80) or longer than `display_max_chars` (12000) are shown as-is. Requires Claude Code ≥ 2.1.152.
 
 ### Content mode: replace the Read result instead of the path
 
@@ -136,7 +140,7 @@ User RU → Haiku (translate in)
 
 ## Plugin contents
 
-- **Hooks:** `PreToolUse` lazy read (600s timeout), `PostToolUse` content mode, `MessageDisplay` display translation, `UserPromptSubmit`/`Stop` opportunity audits, `SessionStart` context note (adds the english-replies instruction when enabled). All guarded by `CLAUDE_TRANSLATE_HOP=1` against recursion; disabled features exit before booting node.
+- **Hooks:** `PreToolUse` lazy read (600s timeout), `PostToolUse` content mode, `MessageDisplay` display translation (600s timeout, off by default), `UserPromptSubmit`/`Stop` opportunity audits, `SessionStart` context note (adds the english-replies instruction when enabled). All guarded by `CLAUDE_TRANSLATE_HOP=1` against recursion; disabled features exit before booting node.
 - **MCP:** `translate` + `resolve_doc` (reuses `@cursor-translate/mcp`; wrapper installed by `init` exports the Claude home).
 - **Slash commands:** `/translate-docs` (warm cache), `/translate-report` (metrics summary).
 

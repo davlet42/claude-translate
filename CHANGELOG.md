@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.5 (2026-07-12)
+
+Display translation rebuilt around how Claude Code actually dispatches `MessageDisplay` (diagnosed live 2026-07-11/12 on CC 2.1.204):
+
+- **Transcript-first final.** Chunk events of one message are dispatched *concurrently*, so the old "buffer deltas, assemble on final" design raced itself — the final drained the buffer before the middle chunks landed, and long replies got a fragment translated or nothing. On the final chunk the hook now resolves the full message text from the session transcript (`transcript_path`; newest assistant entry whose text ends with the final delta), with one 400 ms retry for the sub-second transcript write lag; buffered deltas remain only as a fallback.
+- **Per-paragraph language gate.** Mixed RU/EN replies used to ride one chunk over core's 0.15 Cyrillic gate and stay untranslated. Replies are now segmented per paragraph: Russian paragraphs pass through verbatim (no translate call at all), consecutive English runs batch into ≤1500-char chunks.
+- **No more silent `{}` exits.** Every hook outcome logs a `source: "display_hook"` metric (`displayed`, `unchanged`, `already_russian`, `below_min_chars`, `above_max_chars`, `quota_latched`, `unrecognized_payload`, `hook_error` — the last one also catches exceptions that were previously swallowed by fail-open). `grep display_hook metrics.jsonl` now answers "why was this reply shown in English".
+- **MessageDisplay hook timeout 120 s → 600 s.** Subscription-tier translation queues behind everything else the account is doing; measured worst case for a 3.1k-char reply on a busy account: 5 min 4 s end-to-end (would have been killed at 120 s). Note Claude Code's *default* MessageDisplay timeout is only 10 s — the explicit value is mandatory.
+- **README honesty pass.** Display mode is documented as *eventual Russian* (English renders first, Russian replaces it when the translation lands; seconds when idle, minutes under load) — not real-time. For immediate Russian, keep `english_replies`/`display_back_translate` off (the default) and let the model answer in Russian directly.
+
 ## 0.3.4 (2026-07-08)
 
 - **Full economy report** (via `@cursor-translate/core` ≥ 0.2.7): `ROI full economy` section includes display transcript EN savings; `user_prompt` labeled as interactive-session opportunity (terminal `claude` with plugin, not `claude-translate agent`).
