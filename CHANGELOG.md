@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.9 (2026-07-24)
+
+- **Pull `@cursor-translate/core` ≥ 0.2.13** — fixes multi-minute Read hangs on mid-size Cyrillic docs when `cache.incremental: block` (lazy_read chunk limit now counts incremental Cyrillic units; hook timeout 15s fail-open).
+- Dependencies: `@cursor-translate/core` ^0.2.13; optional `@cursor-translate/mcp` ^0.2.13.
+
 ## 0.3.8 (2026-07-24)
 
 - **Block-level incremental cache** via `@cursor-translate/core` ≥ 0.2.12. Default `cache.incremental: block` — callouts / paragraphs inside `##`/`###`, so editing one revision note in a long roadmap preamble no longer re-translates the whole blob. Modes: `block` · `paragraph` · `section` · `off`.
