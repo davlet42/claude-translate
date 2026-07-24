@@ -26,6 +26,8 @@ jobs:
       - run: npm test
 
       - name: Publish claude-translate
-        run: npm publish
+        # Prefer OIDC trusted publishing (--provenance). Token kept as fallback
+        # for classic auth; GAT tokens can report success without a public tarball.
+        run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

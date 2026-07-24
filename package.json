@@ -1,6 +1,6 @@
 {
   "name": "claude-translate",
-  "version": "0.3.10",
+  "version": "0.3.11",
   "description": "Save tokens on Cyrillic text in Claude Code: cheap Haiku translate tier, lazy EN doc cache via PreToolUse hook, CLAUDE.md sync, MCP",
   "license": "MIT",
   "type": "module",

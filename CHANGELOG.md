@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.11 (2026-07-24)
+
+- Same core ≥ 0.2.13 hang fix. Re-release with `npm publish --access public --provenance` after 0.3.9/0.3.10 were reserved by npm without public tarballs.
+
 ## 0.3.10 (2026-07-24)
 
 - Same as 0.3.9 (core ≥ 0.2.13 lazy-read hang fix). Re-release: npm reserved `0.3.9` without a public tarball (`cannot publish over previously published versions` / not in registry).
