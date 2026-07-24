@@ -26,7 +26,9 @@ jobs:
       - run: npm test
 
       - name: Publish claude-translate
-        # Prefer OIDC trusted publishing (--provenance). Token kept as fallback
-        # for classic auth; GAT tokens can report success without a public tarball.
+        # --provenance for attestations. If classic NPM_TOKEN starts ghost-publishing
+        # again (CI + without a public tarball), switch the package to Trusted Publishing
+        # on npmjs.com and drop NODE_AUTH_TOKEN.
         run: npm publish --access public --provenance
-        # OIDC only — classic NPM_TOKEN was reporting success without public tarballs.
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
