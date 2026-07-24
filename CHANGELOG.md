@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.8 (2026-07-24)
+
+- **Block-level incremental cache** via `@cursor-translate/core` ≥ 0.2.12. Default `cache.incremental: block` — callouts / paragraphs inside `##`/`###`, so editing one revision note in a long roadmap preamble no longer re-translates the whole blob. Modes: `block` · `paragraph` · `section` · `off`.
+
 ## 0.3.7 (2026-07-12)
 
 - **Orphan cache GC** (via `@cursor-translate/core` ≥ 0.2.11): caches of deleted/renamed docs used to live forever (invalidation is sha-based only). New `claude-translate cache-gc [--dry-run] [--days N]` command plus a throttled auto-sweep on the translate path (at most once a day): a cache whose source has been missing for over `cache.gc_orphan_days` (default 30, `0` disables) is removed together with its `.en.sections.json` sidecar. The grace period protects git branch switches; runs are logged as `source: "cache_gc"`.

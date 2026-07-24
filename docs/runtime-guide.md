@@ -138,7 +138,7 @@ Metrics only, never block. `user_prompt` reads the `prompt` field; `agent_respon
 | `cache.lazy_read_max_chars` | `50000` | Skip lazy translate above this size when cache is cold/stale (`0` = off) |
 | `cache.lazy_read_max_chunks` | `3` | Skip lazy translate when estimated Haiku chunks exceed this (`0` = off) |
 | `cache.lazy_read_hints` | `true` | Show per-Read savings hint when lazy translate is skipped |
-| `cache.incremental` | `section` | `section` re-translates only changed `##` / `###` blocks; `off` = full file |
+| `cache.incremental` | `block` | `block` (default) = callouts/paragraphs inside `##`/`###`; `paragraph` · `section` · `off` |
 | `hooks.lazy_read_mode` | `path` | `path` (PreToolUse rewrite) \| `content` (PostToolUse replace) |
 
 > Requires `@cursor-translate/core` ≥ 0.2.1 for nested keys to be read reliably: earlier cores had a YAML-section parsing bug that silently fell back to defaults for every nested key.

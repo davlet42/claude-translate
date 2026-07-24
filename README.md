@@ -19,7 +19,7 @@ Translation is an **investment** (one Haiku spend per doc *version*), serving is
 
 - **Pays off:** stable docs that agents read often — knowledge bases, project registries, `CLAUDE.md`.
 - **First-time translation is the investment:** a fresh doc repays itself in ~1–3 reads (check the `break-even reads` line in your own `report`).
-- **Edits are cheap:** re-translation is **section-incremental** — only the changed sections are re-billed. And since agents `Read` a doc around every `Edit`, reads ≥ edits in practice, and a single read of a mid-size doc typically covers a one-section update. A doc only stays net-negative when it's bulk-rewritten often and rarely read afterwards (one-off scratch notes).
+- **Edits are cheap:** re-translation is **block-incremental** — only the changed callout / paragraph / section is re-billed. And since agents `Read` a doc around every `Edit`, reads ≥ edits in practice, and a single read of a mid-size doc typically covers a one-block update. A doc only stays net-negative when it's bulk-rewritten often and rarely read afterwards (one-off scratch notes).
 - **Saves ~nothing:** code-heavy sessions that rarely `Read` Cyrillic markdown — the savings scale directly with how much Cyrillic documentation your agents actually read.
 
 Don't take the pitch's word for it — every cache hit, every translate spend (with real `claude -p` cost receipts) and every missed opportunity is logged. Pull your own numbers any time:

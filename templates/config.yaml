@@ -42,7 +42,12 @@ cache:
   lazy_read_max_chars: 50000
   lazy_read_max_chunks: 3
   lazy_read_hints: true
-  incremental: section
+  # Incremental doc cache (via @cursor-translate/core):
+  #   block (default) — ##/### then callouts / fences / blank-line paragraphs
+  #   paragraph — ##/### then fences / blank-line paragraphs
+  #   section — ## / ### only (legacy)
+  #   off — whole file
+  incremental: block
 
 glossary:
   file: ~/.claude/translate-proxy/glossary.yaml
