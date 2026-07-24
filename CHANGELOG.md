@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.10 (2026-07-24)
+
+- Same as 0.3.9 (core ≥ 0.2.13 lazy-read hang fix). Re-release: npm reserved `0.3.9` without a public tarball (`cannot publish over previously published versions` / not in registry).
+
 ## 0.3.9 (2026-07-24)
 
 - **Pull `@cursor-translate/core` ≥ 0.2.13** — fixes multi-minute Read hangs on mid-size Cyrillic docs when `cache.incremental: block` (lazy_read chunk limit now counts incremental Cyrillic units; hook timeout 15s fail-open).
