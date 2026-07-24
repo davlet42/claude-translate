@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.13 (2026-07-24)
+
+- Parity release: `@cursor-translate/core` ^0.2.13 (lazy-read hang fix). Single clean npm publish after botched 0.3.11/0.3.12 publish experiments.
+
 ## 0.3.12 (2026-07-24)
 
 - Retry publish via GitHub OIDC trusted publishing only (no classic NPM_TOKEN).

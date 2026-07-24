@@ -26,9 +26,6 @@ jobs:
       - run: npm test
 
       - name: Publish claude-translate
-        # --provenance for attestations. If classic NPM_TOKEN starts ghost-publishing
-        # again (CI + without a public tarball), switch the package to Trusted Publishing
-        # on npmjs.com and drop NODE_AUTH_TOKEN.
-        run: npm publish --access public --provenance
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
