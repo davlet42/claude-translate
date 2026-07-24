@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.12 (2026-07-24)
+
+- Retry publish via GitHub OIDC trusted publishing only (no classic NPM_TOKEN).
+
 ## 0.3.11 (2026-07-24)
 
 - Same core ≥ 0.2.13 hang fix. Re-release with `npm publish --access public --provenance` after 0.3.9/0.3.10 were reserved by npm without public tarballs.

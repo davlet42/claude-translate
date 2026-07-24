@@ -29,5 +29,4 @@ jobs:
         # Prefer OIDC trusted publishing (--provenance). Token kept as fallback
         # for classic auth; GAT tokens can report success without a public tarball.
         run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # OIDC only — classic NPM_TOKEN was reporting success without public tarballs.
