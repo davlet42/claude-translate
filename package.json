@@ -42,7 +42,7 @@
     "@cursor-translate/core": "^0.2.12"
   },
   "optionalDependencies": {
-    "@cursor-translate/mcp": "^0.2.7"
+    "@cursor-translate/mcp": "^0.2.12"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

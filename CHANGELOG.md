@@ -3,6 +3,8 @@
 ## 0.3.8 (2026-07-24)
 
 - **Block-level incremental cache** via `@cursor-translate/core` ≥ 0.2.12. Default `cache.incremental: block` — callouts / paragraphs inside `##`/`###`, so editing one revision note in a long roadmap preamble no longer re-translates the whole blob. Modes: `block` · `paragraph` · `section` · `off`.
+- Dependencies: `@cursor-translate/core` ^0.2.12; optional `@cursor-translate/mcp` ^0.2.12.
+- CI: `actions/checkout@v5` + `actions/setup-node@v5` (Node 24 runtime; clears Node 20 deprecation warnings).
 
 ## 0.3.7 (2026-07-12)
 
